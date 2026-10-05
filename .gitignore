@@ -1,0 +1,16 @@
+__pycache__/
+.venv/
+*.pyc
+
+node_modules/
+.next/
+
+.env
+.env.local
+
+*.csv
+!data/sample/*.csv
+
+.DS_Store
+.vscode/
+.idea/
