@@ -9,7 +9,7 @@ node_modules/
 .env.local
 
 *.csv
-!data/sample/*.csv
+!data/*.csv
 
 .DS_Store
 .vscode/
