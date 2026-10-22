@@ -1,0 +1,60 @@
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import Dashboard from "../../../../components/Dashboard";
+
+const USE_SAMPLE = true;
+
+const SAMPLE = {
+    household: { id: 1, name: "Household 1", city: "Belgrade", weekly_limit_kwh: 40, monthly_limit_kwh: 160 },
+    periods: {
+        daily: {
+            kwh: 4.35, cost: 52.2,
+            appliances: [
+                { name: "Heater", kwh: 1.4 }, { name: "Fridge", kwh: 0.95 }, { name: "Washing Machine", kwh: 0.5 },
+                { name: "TV", kwh: 0.4 }, { name: "Computer", kwh: 0.4 }, { name: "Dishwasher", kwh: 0.3 },
+                { name: "Kettle", kwh: 0.2 }, { name: "Microwave", kwh: 0.1 }, { name: "Laptop", kwh: 0.1 },
+            ],
+        },
+        weekly: {
+            kwh: 29.2, cost: 350.4,
+            appliances: [
+                { name: "Heater", kwh: 9.6 }, { name: "Fridge", kwh: 6.7 }, { name: "Washing Machine", kwh: 2.9 },
+                { name: "Computer", kwh: 2.6 }, { name: "TV", kwh: 2.2 }, { name: "Dishwasher", kwh: 2.1 },
+                { name: "Kettle", kwh: 1.4 }, { name: "Microwave", kwh: 1.0 }, { name: "Laptop", kwh: 0.7 },
+            ],
+        },
+        monthly: {
+            kwh: 125.7, cost: 1508.4,
+            appliances: [
+                { name: "Heater", kwh: 41.5 }, { name: "Fridge", kwh: 28.8 }, { name: "Washing Machine", kwh: 12.4 },
+                { name: "Computer", kwh: 11.2 }, { name: "TV", kwh: 9.6 }, { name: "Dishwasher", kwh: 8.9 },
+                { name: "Kettle", kwh: 6.1 }, { name: "Microwave", kwh: 4.2 }, { name: "Laptop", kwh: 3.0 },
+            ],
+        },
+    },
+};
+
+async function getDashboard(id, token) {
+    const res = await fetch(`${process.env.API_URL}/households/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+    });
+    if (res.status === 401) redirect("/login");
+    if (res.status === 403 || res.status === 404) notFound(); // don't reveal which households exist
+    if (!res.ok) throw new Error("Could not load the dashboard");
+    return res.json();
+}
+
+export default async function HouseholdPage({ params }) {
+    const { id } = await params;
+
+
+    if (USE_SAMPLE) return <Dashboard data={SAMPLE} />;
+
+    if (!/^\d+$/.test(id)) notFound();
+    const token = (await cookies()).get("token")?.value;
+    if (!token) redirect("/login");
+
+    const data = await getDashboard(id, token);
+    return <Dashboard data={data} />;
+}
