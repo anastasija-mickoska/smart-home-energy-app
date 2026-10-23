@@ -25,6 +25,7 @@ export default function LoginPage() {
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           email: email.trim(),
           password: password.trim(),
@@ -38,7 +39,7 @@ export default function LoginPage() {
 
       setError(
         res.status === 401
-          ? "That email and password don't match. Check both and try again."
+          ? "Email and password don't match with any existing user. Check both and try again."
           : "Something went wrong on our side. Try again in a moment."
       );
     } catch {

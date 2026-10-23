@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
-from app.services.auth_service import register_user
-from app.schemas.auth import RegisterRequest, AuthResponse
+from fastapi import APIRouter, Depends, Response, status, Cookie
+from app.services.auth_service import register_user, login_user, get_user
+from app.schemas.auth import RegisterRequest, AuthResponse, LoginRequest
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 
@@ -14,7 +14,7 @@ def register():
 def login():
     return {"message": "Login endpoint"}
 
-@router.post("/register", response_model=AuthResponse, status_code=201)
+@router.post("/register")
 def register(
     data: RegisterRequest,
     db: Session = Depends(get_db),
@@ -23,5 +23,45 @@ def register(
     
 
 @router.post("/login")
-def login():
-    return {"message": "Login endpoint"}
+def login(
+    data:LoginRequest,
+    response: Response,
+    db: Session = Depends(get_db)
+):
+    auth = login_user(db, data)
+
+    response.set_cookie(
+        key="access_token",
+        value=auth.access_token,
+        httponly=True,
+        secure=False,  # Local development only
+        samesite="lax",
+        max_age=1800,
+        path="/",
+    )
+
+    return {
+        "user": {
+            "name": auth.user.name,
+            "email": auth.user.email,
+            "household_id": auth.user.household_id,
+            "role": auth.user.role,
+        }
+    }
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(response: Response):
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=False, 
+        samesite="lax",
+        path="/",
+    )
+
+@router.get("/me")
+def get_current_member(
+    access_token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    return get_user(db, access_token)

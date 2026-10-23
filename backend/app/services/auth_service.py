@@ -16,6 +16,7 @@ from app.schemas.auth import (
     AuthResponse,
     UserResponse,
 )
+from app.auth.security import validate_access_token
 
 password_hash = PasswordHash.recommended()
 
@@ -129,6 +130,38 @@ def login_user(
             name=user.name,
             email=user.email,
             role=user.role,
-            household_id=user.household_id
+            household_id=user.household_id,
         ),
+    )
+
+def get_user(
+    db:Session,
+    access_token: str | None
+) -> UserResponse:
+
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated."
+        )   
+    
+    email = validate_access_token(access_token)
+
+    user = (
+        db.query(User)
+        .filter(User.email == email)
+        .first()
+    )
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    return UserResponse(
+        name=user.name,
+        email=user.email,
+        role=user.role,
+        household_id=user.household_id,
     )

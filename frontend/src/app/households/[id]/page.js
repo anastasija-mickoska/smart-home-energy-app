@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Dashboard from "../../../../components/Dashboard";
+import Navbar from "../../../../components/Navbar";
 
 const USE_SAMPLE = true;
 
@@ -49,7 +50,10 @@ export default async function HouseholdPage({ params }) {
     const { id } = await params;
 
 
-    if (USE_SAMPLE) return <Dashboard data={SAMPLE} />;
+    if (USE_SAMPLE) return <>
+        <Navbar />
+        <Dashboard data={SAMPLE} />;
+    </>
 
     if (!/^\d+$/.test(id)) notFound();
     const token = (await cookies()).get("token")?.value;
