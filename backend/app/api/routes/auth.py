@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status, Cookie
 from app.services.auth_service import register_user, login_user, get_user
-from app.schemas.auth import RegisterRequest, AuthResponse, LoginRequest
+from app.schemas.auth import RegisterRequest, LoginRequest, UserResponse
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 
@@ -59,9 +59,9 @@ def logout(response: Response):
         path="/",
     )
 
-@router.get("/me")
+@router.get("/me", response_model=UserResponse)
 def get_current_member(
     access_token: str | None = Cookie(default=None),
     db: Session = Depends(get_db),
 ):
-    return get_user(db, access_token)
+    return get_user(access_token, db)

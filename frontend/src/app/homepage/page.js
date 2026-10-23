@@ -38,8 +38,12 @@ export default async function WelcomePage() {
   const me = await getUser();
   if (!me) redirect("/login");
 
-  if (me.household_id != 0) redirect(`/households/${me.household_id}`);
-
+  if (
+    me.household_id != null &&
+    Number(me.household_id) !== 0
+  ) {
+    redirect(`/households/${me.household_id}`);
+  }
   const isOwner = me.role === "owner";
 
   return (

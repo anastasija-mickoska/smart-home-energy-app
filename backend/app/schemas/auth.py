@@ -18,6 +18,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: str
     household_id: int
+    member_id: str 
 
 
 class AuthResponse(BaseModel):

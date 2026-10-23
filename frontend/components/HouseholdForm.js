@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 const inputClass =
     "w-full rounded-[20px] border-1 border-[#00000033] bg-[#f3f3f3] px-3.5 py-3 text-base text-[#0a2638] placeholder:text-slate-500 focus-visible:border-[#4ADEDE] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#4ADEDE]/60";
@@ -11,14 +12,14 @@ const COPY = {
         intro: "Enter the household code you received from the household owner.",
         button: "Join Household",
         loading: "Joining…",
-        endpoint: "/api/households/join",
+        endpoint: `${process.env.NEXT_PUBLIC_API_URL}/api/households/join`,
     },
     create: {
         title: "Create a household",
         intro: "Tell us a little about your household.",
         button: "Create Household",
         loading: "Creating…",
-        endpoint: "/api/households/create",
+        endpoint: `${process.env.NEXT_PUBLIC_API_URL}/api/households/create`,
     },
 };
 
@@ -39,7 +40,7 @@ export default function HouseholdForm({ mode = "join" }) {
         let payload;
         if (mode === "join") {
             if (code.trim().length !== 6) {
-                setError("The household code has 6 characters.");
+                setError("The household code should have 6 characters.");
                 return;
             }
             payload = { name: name.trim(), household_code: code.trim() };
@@ -58,7 +59,7 @@ export default function HouseholdForm({ mode = "join" }) {
                 setError("The household should contain exactly 6 characters.");
                 return;
             }
-            payload = { name: name.trim(), city: city.trim() || null, size: n, code: code.trim() };
+            payload = { name: name.trim(), city: city.trim() || null, household_size: n, household_code: code.trim() };
         }
 
         setLoading(true);
@@ -66,11 +67,13 @@ export default function HouseholdForm({ mode = "join" }) {
             const res = await fetch(copy.endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",
                 body: JSON.stringify(payload),
             });
 
             if (res.ok) {
-                window.location.assign("/dashboard");
+                const household = await res.json();
+                window.location.assign(`/households/${household.household_id}`);
                 return;
             }
 
@@ -142,7 +145,7 @@ export default function HouseholdForm({ mode = "join" }) {
                         <input
                             id="hh-name"
                             type="text"
-                            autoComplete="off"
+                            autoComplete="on"
                             maxLength={60}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -182,15 +185,16 @@ export default function HouseholdForm({ mode = "join" }) {
                         />
                     </div>
                     <div className="mb-[18px] flex flex-col gap-2">
-                        <label htmlFor="hh-name" className="text-sm font-semibold">
+                        <label htmlFor="hh-code" className="text-sm font-semibold">
                             Household code
                         </label>
                         <input
-                            id="hh-name"
+                            id="hh-code"
                             type="text"
                             autoComplete="off"
                             placeholder="6 characters"
-                            maxLength={60}
+                            minLength={6}
+                            maxLength={6}
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             className={inputClass}
@@ -216,17 +220,7 @@ export default function HouseholdForm({ mode = "join" }) {
             >
                 {loading ? copy.loading : copy.button}
                 {!loading && (
-                    <svg
-                        aria-hidden="true"
-                        viewBox="0 0 20 20"
-                        className="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                    >
-                        <path d="M10 4v12M4 10h12" />
-                    </svg>
+                    <Image src="/add.png" height={25} width={25} alt="Add icon"/>
                 )}
             </button>
         </div>

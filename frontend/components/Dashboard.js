@@ -220,7 +220,7 @@ function AppliancePie({ slices }) {
   );
 }
 
-export default function Dashboard({ data }) {
+export default function Dashboard({ data, isOwner }) {
   const [period, setPeriod] = useState("daily");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
@@ -357,11 +357,13 @@ export default function Dashboard({ data }) {
           ))}
         </div>
 
-        <CustomButton
-          imgSource="edit"
-          text="Manage Usage Limits"
-          onClick={() => setIsModalOpen(true)}
-        />
+        {isOwner && (
+          <CustomButton
+            imgSource="edit"
+            text="Manage Usage Limits"
+            onClick={() => setIsModalOpen(true)}
+          />
+        )}
 
       </div>
     </main>

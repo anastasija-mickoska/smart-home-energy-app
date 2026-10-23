@@ -35,9 +35,42 @@ const SAMPLE = {
     },
 };
 
-async function getDashboard(id, token) {
-    const res = await fetch(`${process.env.API_URL}/households/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+async function getUser() {
+    const cookieStore = await cookies();
+
+    try {
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+            {
+                headers: {
+                    Cookie: cookieStore.toString(),
+                },
+                cache: "no-store",
+            }
+        );
+
+        if (res.status === 401) {
+            redirect("/login");
+        }
+
+        if (!res.ok) {
+            throw new Error("Could not load your profile");
+        }
+
+        return await res.json();
+    } catch (error) {
+        if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+            throw error;
+        }
+        throw error;
+    }
+}
+
+async function getDashboard(id) {
+    const res = await fetch(`${process.env.API_URL}/api/households/${id}`, {
+        headers: {
+            Cookie: cookieStore.toString(),
+        },
         cache: "no-store",
     });
     if (res.status === 401) redirect("/login");
@@ -48,17 +81,17 @@ async function getDashboard(id, token) {
 
 export default async function HouseholdPage({ params }) {
     const { id } = await params;
-
+    const me = await getUser();
+    const isOwner = me.role === 'owner';
 
     if (USE_SAMPLE) return <>
         <Navbar />
         <Dashboard data={SAMPLE} />;
     </>
 
-    if (!/^\d+$/.test(id)) notFound();
-    const token = (await cookies()).get("token")?.value;
-    if (!token) redirect("/login");
-
-    const data = await getDashboard(id, token);
-    return <Dashboard data={data} />;
+    const data = await getDashboard(id);
+    return <>
+        <Navbar />
+        <Dashboard data={data} isOwner={isOwner} />
+    </>;
 }

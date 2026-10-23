@@ -3,11 +3,12 @@ from datetime import datetime, timedelta, timezone
 from  dotenv import load_dotenv
 
 import jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
 from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from app.db.session import get_db
 
 from app.models.user import User
 from app.schemas.auth import (
@@ -94,7 +95,8 @@ def register_user(
             name=user.name,
             email=user.email,
             role=user.role,
-            household_id=user.household_id
+            household_id=user.household_id,
+            member_id= ''
         ),
     )
 
@@ -131,13 +133,14 @@ def login_user(
             email=user.email,
             role=user.role,
             household_id=user.household_id,
+            member_id=''
         ),
     )
 
 def get_user(
-    db:Session,
-    access_token: str | None
-) -> UserResponse:
+    access_token: str | None,
+    db:Session = Depends(get_db),
+) -> User:
 
     if not access_token:
         raise HTTPException(
@@ -159,9 +162,12 @@ def get_user(
             detail="User not found",
         )
 
-    return UserResponse(
-        name=user.name,
-        email=user.email,
-        role=user.role,
-        household_id=user.household_id,
-    )
+    return user
+
+    # return UserResponse(
+    #     name=user.name,
+    #     email=user.email,
+    #     role=user.role,
+    #     household_id=user.household_id,
+    #     member_id=user.member_id
+    # )
