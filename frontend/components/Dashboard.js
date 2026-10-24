@@ -225,14 +225,36 @@ export default function Dashboard({ data, isOwner }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
-  const { household, periods } = data;
-  const current = periods[period];
+  // const slices = buildSlices(current.appliances);
+
+  const usageByPeriod = {
+    daily: {
+      highTariff: data.daily_high_tariff_kwh,
+      lowTariff: data.daily_low_tariff_kwh,
+      highTariffCost: data.daily_high_tariff_cost,
+      lowTariffCost: data.daily_low_tariff_cost,
+    },
+    weekly: {
+      highTariff: data.weekly_high_tariff_kwh,
+      lowTariff: data.weekly_low_tariff_kwh,
+      highTariffCost: data.weekly_high_tariff_cost,
+      lowTariffCost: data.weekly_low_tariff_cost,
+    },
+    monthly: {
+      highTariff: data.monthly_high_tariff_kwh,
+      lowTariff: data.monthly_low_tariff_kwh,
+      highTariffCost: data.monthly_high_tariff_cost,
+      lowTariffCost: data.monthly_low_tariff_cost,
+    },
+  };
+
+  const current = usageByPeriod[period];
+  const used = current.highTariff + current.lowTariff;
+  const cost = current.highTariffCost + current.lowTariffCost;
 
   const limit = limitFor(period, household);
   const hasLimit = limit != null && limit > 0;
-  const over = hasLimit && current.kwh > limit;
-
-  const slices = buildSlices(current.appliances);
+  const over = hasLimit && used > limit;
 
   const handleSaveLimits = async (newWeeklyLimit, newMonthlyLimit) => {
     // Call your API here to save the new limits.
@@ -284,7 +306,7 @@ export default function Dashboard({ data, isOwner }) {
             </h2>
 
             <Donut
-              used={current.kwh}
+              used={used}
               limit={limit}
               period={period}
             />

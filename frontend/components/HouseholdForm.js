@@ -112,7 +112,7 @@ export default function HouseholdForm({ mode = "join" }) {
                     <input
                         id="hh-code"
                         type="text"
-                        autoComplete="off"
+                        autoComplete="on"
                         autoCapitalize="characters"
                         spellCheck={false}
                         placeholder="Enter name..."
