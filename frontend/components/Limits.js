@@ -1,6 +1,6 @@
 const Limits = ({ week, month }) => {
     return (
-        <div className="flex md:w-1/2 w-auto items-center justify-around rounded-[20px] bg-[#1F2F98] p-[10px]">
+        <div className="flex md:w-1/2 w-full items-center justify-around rounded-[20px] bg-[#1F2F98] p-[10px]">
             <div className="flex items-center justify-between">
                 <img
                     src="/lightbulb.png"

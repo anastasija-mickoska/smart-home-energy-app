@@ -15,7 +15,7 @@ const CustomButton = ({ onClick, imgSource, text }) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-10 w-auto items-center justify-center rounded-[20px] border border-[#1F2F98] bg-[#F3F3F3]"
+      className="flex h-10 w-auto items-center justify-center rounded-[20px] border border-[#1F2F98] bg-[#F3F3F3] p-6 cursor-pointer"
     >
       <div className="flex items-center justify-center gap-[10px]">
         {imgSource && iconMap[imgSource] && (

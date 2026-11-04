@@ -35,8 +35,6 @@ export default function RegisterPage() {
         }),
       });
 
-      console.log("Result:",res)
-
       if (res.ok) {
         window.location.assign("/login");
         return;
